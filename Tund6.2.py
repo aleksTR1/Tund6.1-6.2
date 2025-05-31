@@ -1,7 +1,3 @@
-import random
-import pyttsx3
-
-# Исходные данные — список словарей
 sonad = [
     {'est': 'koer', 'rus': 'собака', 'eng': 'dog'},
     {'est': 'kass', 'rus': 'кошка', 'eng': 'cat'},
@@ -10,83 +6,67 @@ sonad = [
     {'est': 'päike', 'rus': 'солнце', 'eng': 'sun'}
 ]
 
+# Переводчик
 def tolkija(sonad, allikas, siht, sona):
     for kirje in sonad:
         if kirje[allikas] == sona.lower():
             return kirje[siht]
     return "Sõna ei leitud!"
 
+# Добавление слова
 def lisa_sona(sonad):
-    est = input("Eesti: ").strip().lower()
-    rus = input("Vene: ").strip().lower()
-    eng = input("Inglise: ").strip().lower()
-    sonad.append({'est': est, 'rus': rus, 'eng': eng})
+    print("Lisame uue sõna:")
+    uus_est = input("Sisesta eesti keeles: ").strip().lower()
+    uus_rus = input("Sisesta vene keeles: ").strip().lower()
+    uus_eng = input("Sisesta inglise keeles: ").strip().lower()
+    sonad.append({'est': uus_est, 'rus': uus_rus, 'eng': uus_eng})
     print("Sõna lisatud!")
 
+# Исправление слова
 def paranda_sona(sonad):
-    keele_valik = input("Paranda sõna keeles (est/rus/eng): ").strip().lower()
-    vana = input("Sisesta vana sõna: ").strip().lower()
-    uus = input("Sisesta uus sõna: ").strip().lower()
+    vana_sona = input("Sisesta sõna, mida parandada (ükskõik mis keel): ").strip().lower()
     for kirje in sonad:
-        if kirje[keele_valik] == vana:
-            kirje[keele_valik] = uus
-            print("Parandus tehtud!")
+        if vana_sona in kirje.values():
+            print("Leitud:", kirje)
+            kirje['est'] = input("Uus eesti sõna: ").strip().lower()
+            kirje['rus'] = input("Uus vene sõna: ").strip().lower()
+            kirje['eng'] = input("Uus inglise sõna: ").strip().lower()
+            print("Sõna parandatud!")
             return
-    print("Sõna ei leitud.")
+    print("Sõna ei leitud!")
 
+# Тест
+import random
 def testi_teadmisi(sonad):
-    keeled = ['est', 'rus', 'eng']
-    õige = 0
-    küsimuste_arv = 3
-    for _ in range(küsimuste_arv):
-        kirje = random.choice(sonad)
-        allikas = random.choice(keeled)
-        siht = random.choice([k for k in keeled if k != allikas])
-        vastus = input(f"Tõlgi '{kirje[allikas]}' keelest {allikas} keelde {siht}: ").strip().lower()
-        if vastus == kirje[siht]:
+    print("Test algab! 5 küsimust.")
+    allikad = ['est', 'rus', 'eng']
+    punktid = 0
+    for _ in range(5):
+        suund = random.choice([(a, b) for a in allikad for b in allikad if a != b])
+        valik = random.choice(sonad)
+        print(f"Tõlgi sõna '{valik[suund[0]]}' keelest {suund[0]} → {suund[1]}")
+        vastus = input("Sinu vastus: ").strip().lower()
+        if vastus == valik[suund[1]]:
             print("Õige!")
-            õige += 1
+            punktid += 1
         else:
-            print(f"Vale! Õige vastus on '{kirje[siht]}'")
-    protsent = õige / küsimuste_arv * 100
-    print(f"Tulemus: {protsent:.0f}%")
+            print(f"Vale! Õige vastus on: {valik[suund[1]]}")
+    print(f"Said {punktid} punkti 5st.")
 
-def text_to_speech(sona, keel='eng'):
-    engine = pyttsx3.init()
-    voices = engine.getProperty('voices')
-    # Пример: русская озвучка — voices[1], английская — voices[0], эстонская может отсутствовать
-    if keel == 'rus':
-        engine.setProperty('voice', voices[1].id)
-    else:
-        engine.setProperty('voice', voices[0].id)
-    engine.say(sona)
-    engine.runAndWait()
-
-def kuva_menuu():
-    print("\nValikud:")
-    print("1 - Tõlgi")
-    print("2 - Lisa sõna")
-    print("3 - Paranda sõna")
-    print("4 - Testi teadmisi")
-    print("5 - Kuula sõna")
-    print("6 - Välju")
-
-def vali_keel(prompt):
-    valik = input(prompt).strip().lower()
-    if valik in ['est', 'rus', 'eng']:
-        return valik
-    else:
-        print("Vale keel, proovi uuesti.")
-        return vali_keel(prompt)
-
-def main():
-    print("Tere tulemast kolme keele sõnastikku!")
+# Главное меню
+def menuu():
     while True:
-        kuva_menuu()
-        valik = input("Tee valik: ").strip()
+        print("\n=== Sõnastik ===")
+        print("1 - Tõlgi sõna")
+        print("2 - Lisa uus sõna")
+        print("3 - Paranda sõna")
+        print("4 - Teadmiste test")
+        print("5 - Välju")
+        valik = input("Vali tegevus: ")
+
         if valik == '1':
-            allikas = vali_keel("Sisesta algkeel (est/rus/eng): ")
-            siht = vali_keel("Sisesta sihtkeel (est/rus/eng): ")
+            allikas = input("Millisest keelest? (est/rus/eng): ").strip().lower()
+            siht = input("Millisesse keelde? (est/rus/eng): ").strip().lower()
             sona = input("Sisesta sõna: ").strip().lower()
             print("Tõlge:", tolkija(sonad, allikas, siht, sona))
         elif valik == '2':
@@ -96,14 +76,10 @@ def main():
         elif valik == '4':
             testi_teadmisi(sonad)
         elif valik == '5':
-            keel = vali_keel("Sisesta keele kood, et kuulata sõna (est/rus/eng): ")
-            sona = input("Sisesta sõna, mida kuulata: ").strip()
-            text_to_speech(sona, keel)
-        elif valik == '6':
             print("Head aega!")
             break
         else:
             print("Vale valik!")
 
 if __name__ == "__main__":
-    main()
+    menuu()
